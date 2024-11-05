@@ -12,10 +12,6 @@ DIN912_s = [1.5, 1.5, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 14.0, 
 
 
 
-
-
-
-
 module hex(s,h) {
     n = 6;
     rm = s / 2;
@@ -28,27 +24,46 @@ hex_key_set1 = [1.5, 2.0, 2.5, 3.0, 4.0];
 hex_key_set2 = [5.0, 6.0, 8.0, 10.0, 12.0];
 
 module hexes(h, spacing, arr) {
-    spaces = [for (x = [0:len(arr)-1]) arr[x]*spacing];
+    //spaces = [for (x = [0:len(arr)-1]) x*spacing];
     //y = -arr[0]*spacing - spaces[len(spaces)-1]/2;
-    y = -spaces[0] - spaces[len(spaces)-1]/3;
-    translate([0, y, 0]) {
+    //y = -spaces[0] - spaces[len(spaces)-1]/3;
+    //y = 0;
+    y = spacing * ((len(arr)-1) / 2.0);
+    translate([0, -y, 0]) {
         for ( i = [0:len(arr)-1] ){
-            s = arr[i];
-            translate([0, spaces[i], 0]) {
-                hex(s,h);
+            translate([0, i * spacing, 0]) {
+                hex(arr[i], h);
             }
         }
     }
 }
 
 
+module grid_linear_y(n, stride) {
+    translate([0, ((n-1)/2) * -stride, 0])
+    for ( i = [0:n-1] ){
+        translate([0, i*stride, 0])
+            children();
+    }
+}
+
+
+
+
 translate([-20, 0, 0])
 difference() {
-    spacing = 20;
-    cube([20,100,10],center=true);
+    spacing = 10;
+    thick = 20;
+    length = 50;
+    height = 14;
+    cube([thick, length,height],center=true);
     group() {
+        rotate ([0,90,0])
+            translate([0, 0, thick/2])
+            grid_linear_y(n=3, stride=15)
+                cylinder(h=4, r=5,center=true);
         translate([0, 0, 0]) {
-            hexes(11, spacing, hex_key_set1);
+            hexes(height+1, spacing, hex_key_set1);
         }
     }
 }
@@ -56,11 +71,18 @@ difference() {
 
 translate([20, 0, 0])
 difference() {
-    spacing = 10;
-    cube([20,100,10],center=true);
+    spacing = 20;
+    thick = 20;
+    length = 100;
+    height = 14;
+    cube([thick, length,height],center=true);
     group() {
+        rotate ([0,90,0])
+            translate([0, 0, thick/2])
+            grid_linear_y(n=6, stride=15)
+                cylinder(h=4, r=5,center=true);
         translate([0, 0, 0]) {
-            hexes(11, spacing, hex_key_set2);
+            hexes(height+1, spacing, hex_key_set2);
         }
     }
 }
