@@ -12,8 +12,8 @@ Bolt_M5 = 6;
 // DIN 912 screws across flats sizes
 //          M1.4 M1.6 M2   M2.5 M3   M4   M5   M6
 DIN912_s = [1.5, 1.5, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 14.0, 17.0];
-hex_key_set1 = [1.5, 2.0, 2.5, 3.0, 4.0, 5.0];
-hex_key_set2 = [5.0, 6.0, 8.0, 10.0, 12.0];
+hex_key_set1 = [1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0];
+hex_key_set2 = [4.0, 5.0, 6.0, 8.0, 10.0, 12.0];
 
 
 module hex(s,h) {
@@ -27,7 +27,7 @@ module t(t, s = 7, style = ":style=Bold", spacing = 1) {
   rotate([90, 0, 0])
     mirror([0,0,1])
     mirror([0,1,0])
-    linear_extrude(height = 3)
+    linear_extrude(height = 3, center=true)
       text(t, size = s,
            spacing=spacing,
            halign = "center",
@@ -41,6 +41,7 @@ module hexes(h, spacing, arr) {
     //y = -spaces[0] - spaces[len(spaces)-1]/3;
     //y = 0;
     y = spacing * ((len(arr)-1) / 2.0);
+    color([0,1,0])
     translate([0, -y, 0]) {
         for ( i = [0:len(arr)-1] ){
             translate([0, i * spacing, 0]) {
@@ -54,6 +55,7 @@ module texes(spacing, arr) {
     s = 5;
     y = spacing * ((len(arr)-1) / 2.0);
     translate([0, -y, 0])
+    color([1,0,0])
     for ( i = [0:len(arr)-1] ){
         translate([0, i * spacing, -s/2])
         rotate ([0,180,90])
@@ -70,23 +72,42 @@ module grid_linear_y(n, stride) {
 }
 
 
+module case(t,l,h,r) {
+    hull(){
+        translate([-t/2+r, l/2-r, 0])
+            cylinder(h=h, r=r,center=true);
+        translate([-t/2+r, -l/2+r, 0])
+            cylinder(h=h, r=r,center=true);
+        translate([t/2-r/2, l/2-r/2, 0])
+            cube([r,r,h],center=true);
+        translate([t/2-r/2, -l/2+r/2, 0])
+            cube([r,r,h],center=true);
+    }
+}
 
+
+
+corner_radius = 10;
+magnet_thick = 4;
+magnet_radius = 5;
 
 translate([-20, 0, 0])
 difference() {
-    spacing = 10;
+    spacing = 12;
     thick = 20;
-    length = 60;
+    length = 100;
     height = 14;
-    cube([thick, length,height],center=true);
+    case(thick, length, height, corner_radius);
+    //cube([thick, length,height],center=true);
     group() {
         rotate ([0,90,0])
             translate([0, 0, thick/2])
-            grid_linear_y(n=3, stride=15)
-                cylinder(h=4, r=5,center=true);
+            grid_linear_y(n=7, stride=14)
+                color([1,0,1])
+                cylinder(h=magnet_thick, r=magnet_radius,center=true);
         translate([0, 0, 0])
             hexes(height+1, spacing, hex_key_set1);
-        translate([-9, 0, 0])
+        translate([-thick/2, 0, 0])
             texes(spacing, hex_key_set1);
     }
 }
@@ -94,19 +115,21 @@ difference() {
 
 translate([20, 0, 0])
 difference() {
-    spacing = 20;
+    spacing = 16;
     thick = 20;
     length = 100;
     height = 14;
-    cube([thick, length,height],center=true);
+    case(thick, length, height, corner_radius);
+    //cube([thick, length,height],center=true);
     group() {
         rotate ([0,90,0])
             translate([0, 0, thick/2])
-            grid_linear_y(n=6, stride=15)
-                cylinder(h=4, r=5,center=true);
+            color([1,0,1])
+            grid_linear_y(n=7, stride=14)
+                cylinder(h=magnet_thick, r=magnet_radius,center=true);
         translate([0, 0, 0])
             hexes(height+1, spacing, hex_key_set2);
-        translate([-9, 0, 0])
+        translate([-thick/2, 0, 0])
             texes(spacing, hex_key_set2);
     }
 }
