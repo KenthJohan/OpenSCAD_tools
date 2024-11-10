@@ -1,19 +1,20 @@
-// https://www.lwfasteners.com.tw/index.php?option=module&lang=en&task=pageinfo&id=51&index=1
+/* [Hex key] */
+global_hex_key_set1 = [1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0];
+global_hex_key_set2 = [4.0, 5.0, 6.0, 8.0, 10.0, 12.0];
+global_spacing1 = 12;
+global_spacing2 = 16;
+global_hex_margin = 0.3;
 
-// https://github.com/openscad/openscad/issues/405
+/* [Box] */
+global_corner_radius = 8;
+global_h1 = 8;
+global_h2 = 13;
+global_thick = 20;
 
-Bolt_M1_4 = 0;
-Bolt_M1_6 = 1;
-Bolt_M2 = 2;
-Bolt_M2_5 = 3;
-Bolt_M3 = 4;
-Bolt_M4 = 5;
-Bolt_M5 = 6;
-// DIN 912 screws across flats sizes
-//          M1.4 M1.6 M2   M2.5 M3   M4   M5   M6
-DIN912_s = [1.5, 1.5, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 14.0, 17.0];
-hex_key_set1 = [1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0];
-hex_key_set2 = [4.0, 5.0, 6.0, 8.0, 10.0, 12.0];
+/* [Magnet] */
+global_magnet_thick = 4;
+global_magnet_radius = 5;
+
 
 
 module hex(s,h) {
@@ -45,7 +46,7 @@ module hexes(h, spacing, arr) {
     translate([0, -y, 0]) {
         for ( i = [0:len(arr)-1] ){
             translate([0, i * spacing, 0]) {
-                hex(arr[i], h);
+                hex(arr[i]+global_hex_margin, h);
             }
         }
     }
@@ -72,66 +73,62 @@ module grid_linear_y(n, stride) {
 }
 
 
-module case(t,l,h,r) {
+module case(t,l,h,r,h2) {
+    th = 1;
+    //translate([t/2-th/2, 0, 0]) cube([th,l,h*2],center=true);
     hull(){
-        translate([-t/2+r, l/2-r, 0])
-            cylinder(h=h, r=r,center=true);
-        translate([-t/2+r, -l/2+r, 0])
-            cylinder(h=h, r=r,center=true);
-        translate([t/2-r/2, l/2-r/2, 0])
-            cube([r,r,h],center=true);
-        translate([t/2-r/2, -l/2+r/2, 0])
-            cube([r,r,h],center=true);
+        translate([-t/2+r, l/2-r, -h/2])
+            rotate ([0,0,90]) rotate_extrude(angle=90) square([r,h]);
+        translate([-t/2+r, -l/2+r, -h/2])
+            rotate ([0,0,180]) rotate_extrude(angle=90) square([r,h]);
+        translate([t/2-th/2, 0, 0])
+            cube([th,l,h2],center=true);
     }
 }
 
 
 
-corner_radius = 10;
-magnet_thick = 4;
-magnet_radius = 5;
+module product(thick = 20, corner_radius = 10, magnet_thick = 4, magnet_radius = 5, length = 100, h1 = 14, h2 = 14, spacing, arr) {
+    difference() {
+        case(thick, length, h1, corner_radius, h2);
+        //cube([thick, length,height],center=true);
+        group() {
+            rotate ([0,90,0])
+                translate([0, 0, thick/2])
+                grid_linear_y(n=7, stride=14)
+                    color([1,0,1])
+                    cylinder(h=magnet_thick, r=magnet_radius, center=true);
+            translate([0, 0, 0])
+                hexes(h1+10, spacing, arr);
+            translate([-thick/2, 0, 0])
+                texes(spacing, arr);
+        }
+    }
+}
+
+
+
+
+
 
 translate([-20, 0, 0])
-difference() {
-    spacing = 12;
-    thick = 20;
-    length = 100;
-    height = 14;
-    case(thick, length, height, corner_radius);
-    //cube([thick, length,height],center=true);
-    group() {
-        rotate ([0,90,0])
-            translate([0, 0, thick/2])
-            grid_linear_y(n=7, stride=14)
-                color([1,0,1])
-                cylinder(h=magnet_thick, r=magnet_radius,center=true);
-        translate([0, 0, 0])
-            hexes(height+1, spacing, hex_key_set1);
-        translate([-thick/2, 0, 0])
-            texes(spacing, hex_key_set1);
-    }
-}
-
+product(
+thick = global_thick,
+h1 = global_h1,
+h2 = global_h2,
+corner_radius = global_corner_radius, 
+magnet_thick = global_magnet_thick, 
+magnet_radius = global_magnet_radius, 
+spacing = global_spacing1, 
+arr = global_hex_key_set1);
 
 translate([20, 0, 0])
-difference() {
-    spacing = 16;
-    thick = 20;
-    length = 100;
-    height = 14;
-    case(thick, length, height, corner_radius);
-    //cube([thick, length,height],center=true);
-    group() {
-        rotate ([0,90,0])
-            translate([0, 0, thick/2])
-            color([1,0,1])
-            grid_linear_y(n=7, stride=14)
-                cylinder(h=magnet_thick, r=magnet_radius,center=true);
-        translate([0, 0, 0])
-            hexes(height+1, spacing, hex_key_set2);
-        translate([-thick/2, 0, 0])
-            texes(spacing, hex_key_set2);
-    }
-}
-
-
+product(
+thick = global_thick,
+h1 = global_h1,
+h2 = global_h2,
+corner_radius = global_corner_radius, 
+magnet_thick = global_magnet_thick, 
+magnet_radius = global_magnet_radius, 
+spacing = global_spacing2, 
+arr = global_hex_key_set2);
