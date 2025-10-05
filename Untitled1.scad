@@ -3,21 +3,17 @@
 
 include <BOSL2/std.scad>
 
-
-module hex(s,h,anchor=BOTTOM) {
-    n = 6;
-    rm = s / 2;
-    r = rm / cos(180/n);
-    cylinder(h=h, r=r,$fn=n,anchor=anchor);
-}
+BOLT_M8_SIDESIDE = 13; // 13mm
+BOLT_M8_CLOSEFIT = 8.4; // 8.4mm
+BOLT_M8_HEAD = 5; // 5mm
 
 
 module hex_rod(h) {
     r = 6;
-    hex(18, 16, BOTTOM);
-    hex(18, 16, CENTER);
-    zcyl(h=h, r=r,anchor=BOTTOM);
-    zcyl(h=h, r=r,anchor=CENTER);
+    linear_extrude(height = BOLT_M8_HEAD + 5, center = false, convexity = 10, twist = 0,anchor=BOTTOM)
+    hexagon(id=BOLT_M8_SIDESIDE,anchor=CENTER);
+    zcyl(h=h, d=BOLT_M8_CLOSEFIT,anchor=BOTTOM);
+    zcyl(h=h, d=BOLT_M8_CLOSEFIT,anchor=CENTER);
 }
 
 
@@ -30,7 +26,7 @@ module griddy() {
 }
 
 difference() {
-cuboid([100,100,40], edges=[[-1,-1,0],[1,-1,0],[-1,1,0],[1,1,0]], chamfer=4,anchor=BOTTOM);
+cuboid([100,100,40], edges=[[-1,-1,0],[1,-1,0],[-1,1,0],[1,1,0]], chamfer=8,anchor=BOTTOM);
 griddy();
 }
 
