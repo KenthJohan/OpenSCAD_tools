@@ -20,7 +20,7 @@ module body_pcb() {
         cuboid(lcd1602_pcb,anchor=[0,0,-1]);
         template_holes(lcd1602_pcb.z*2);
     }
-    color([0.1, 0.1, 0.1, 1])
+    color([0.1, 0.3, 0.1, 1])
     translate([0, 0, lcd1602_pcb[2]])
         cuboid(lcd1602_disp,anchor=[0,0,-1]);
 }
@@ -36,24 +36,28 @@ module body_case(h) {
     }
 }
 
-nn = [1,4];
-padding = 4;
-wall = 3;
 
-grid_copies(spacing=lcd1602_pcb.xy, n=nn)
-body_pcb();
 
-translate([0,0,5])
-{
-s = [lcd1602_pcb.x*nn.x, lcd1602_pcb.y*nn.y];
-echo("case ", s.x, " ", s.y);
-grid_copies(spacing=lcd1602_pcb.xy, n=nn) body_case(lcd1602_case.z-0.1);
-color([1, 1, 1, 1])
-rect_tube(isize=s, wall=padding, h=lcd1602_case.z);
-translate([0,0,-30])
-rect_tube(isize=[s.x+0.5, s.y+0.5], wall=wall, h=30);
+
+
+module body_case2(nn, padding) {
+    s = [lcd1602_pcb.x*nn.x, lcd1602_pcb.y*nn.y];
+    echo("case ", s.x, " ", s.y);
+    grid_copies(spacing=lcd1602_pcb.xy, n=nn) body_case(lcd1602_case.z-0.1);
+    color([1, 1, 1, 1])
+    rect_tube(isize=s, wall=padding, h=lcd1602_case.z);
+    //translate([0,0,-30])
+    //rect_tube(isize=[s.x+0.5, s.y+0.5], wall=wall, h=30);
 }
 
+
+
+nn = [1,4];
+padding = 4;
+
+//grid_copies(spacing=lcd1602_pcb.xy, n=nn) body_pcb();
+translate([0,0,5]) body_case2(nn, padding);
+//translate([0,0,-10]) body_case2(nn, padding);
 
 /*
 module body_rebar() {
