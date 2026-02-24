@@ -27,7 +27,7 @@ module bearing(do,di,h) {
 module bearing608() bearing(bearing608_do, bearing608_di, bearing608_h);
 
 
-module spool_spinner_half(base_d,base_h,pocket_d,pocket_h, hex_flat_d) {
+module spool_spinner_half(base_d,base_h,pocket_d,pocket_h, id) {
     difference() {
         // Base cylinder, anchored at bottom for easy positioning
         cyl(d=base_d, h=base_h, anchor=BOTTOM);
@@ -40,7 +40,7 @@ module spool_spinner_half(base_d,base_h,pocket_d,pocket_h, hex_flat_d) {
         // Place it so it also cuts downward from the top face.
         up(-epsilon)
             linear_extrude(height=base_h + epsilon)
-                regular_ngon(n=6, d=hex_flat_d);
+                regular_ngon(n=6, id=id);
     }
 }
 
@@ -49,12 +49,12 @@ module spool_spinner(
     base_h,
     pocket_d,
     pocket_h,
-    hex_flat_d
+    id
 ) {
     // Decenter z axis
     translate([0,0,base_h/2]) {
-        spool_spinner_half(base_d=base_d, base_h=base_h/2, pocket_d=pocket_d, pocket_h=pocket_h, hex_flat_d=hex_flat_d);
-        mirror([0,0,1]) spool_spinner_half(base_d=base_d, base_h=base_h/2, pocket_d=pocket_d, pocket_h=pocket_h, hex_flat_d=hex_flat_d);
+        spool_spinner_half(base_d=base_d, base_h=base_h/2, pocket_d=pocket_d, pocket_h=pocket_h, id=id);
+        mirror([0,0,1]) spool_spinner_half(base_d=base_d, base_h=base_h/2, pocket_d=pocket_d, pocket_h=pocket_h, id=id);
     }
 }
 
@@ -72,49 +72,67 @@ module spool_static(
         union() {
             translate([0,0,0])      cyl(d=base_d, h=base_h, anchor=BOTTOM);
             translate([0,0,base_h]) cyl(d=axis_d, h=axis_h, anchor=BOTTOM);
+            translate([0,0,base_h]) cyl(d=axis_d+4, h=0.4, anchor=BOTTOM);
         }
         up(-epsilon) cyl(d=hole_d, h=axis_h + axis_h + epsilon*2, anchor=BOTTOM);
     }
 }
 
 
+j = 38.5;
+
 module banana() {
-    spool_side_thickness = 3;
+    spinner_side_thickness = 1.6;
     spinner_h = 25;
+    spinner_d = 65;
+    hex_id = 5.0 + 0.5; //0.2
+    bearing_od = bearing608_do + 0.2;
+    
     
     color([0.8, 0.5, 0.5, 1])
     translate([0,0,0])
-    spool_static(base_d=100, base_h=spool_side_thickness, axis_d=bearing608_di-1, axis_h=bearing608_h-epsilon, hole_d=bearing608_di-3);
+    spool_static(
+    base_d=spinner_d, 
+    base_h=spinner_side_thickness, 
+    axis_d=bearing608_di + 0.3, 
+    axis_h=bearing608_h - epsilon, 
+    hole_d=bearing608_di - 2
+    );
 
+    
+    /*
     color([1, 1, 0, 1])
-    translate([0,0,spool_side_thickness+0.5])
+    translate([0,0,spinner_side_thickness + 0.5])
     bearing608();
     
     color([1, 1, 0, 1])
-    translate([0,0,spool_side_thickness + spinner_h - bearing608_h])
+    translate([0,0,spinner_side_thickness + spinner_h - bearing608_h])
     bearing608();
-
-    translate([0,0,spool_side_thickness+0.5])
+    
+    translate([0,0,spinner_side_thickness + 0.5])
     color([0.6, 0, 0.6, 1])
-    spool_spinner(base_d=40, base_h=spinner_h, pocket_d=bearing608_do+1, pocket_h=bearing608_h+1, hex_flat_d=4);
+    spool_spinner(base_d=26, base_h=j-(bearing608_h-+spinner_side_thickness*2), pocket_d=bearing_od, pocket_h=bearing608_h, id=hex_id);
+    
+    */
 }
 
 
-view_cross_section = true;
+view_cross_section = false;
+
 
 if (view_cross_section) {
     difference() {
     banana();
     translate([-100,0,-100])
-    cube([200,200,200]);
+    cube([200,100,200]);
     }
 } else {
     banana();
 }
 
-
-
-
+//cube([j,j,j]);
+//translate([-100,0,-100])
+//cube([200,100,200]);
 
 
 
